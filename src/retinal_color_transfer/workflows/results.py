@@ -336,12 +336,24 @@ def _paired_bootstrap(
     baseline_abs = np.abs(frame[baseline_column].to_numpy(dtype=np.float64) - y_true)
     candidate_abs = np.abs(frame[candidate_column].to_numpy(dtype=np.float64) - y_true)
     observed = float(np.mean(baseline_abs) - np.mean(candidate_abs))
+    patient_codes, patient_ids = pd.factorize(frame["patient_id"], sort=False)
+    patient_count = len(patient_ids)
+    patient_sizes = np.bincount(patient_codes, minlength=patient_count)
+    patient_improvement_sums = np.bincount(
+        patient_codes,
+        weights=baseline_abs - candidate_abs,
+        minlength=patient_count,
+    )
     boot = np.empty(samples, dtype=np.float64)
     for index in range(samples):
-        sample = rng.integers(0, len(frame), size=len(frame))
-        boot[index] = float(np.mean(baseline_abs[sample]) - np.mean(candidate_abs[sample]))
+        sampled_patients = rng.integers(0, patient_count, size=patient_count)
+        boot[index] = float(
+            patient_improvement_sums[sampled_patients].sum()
+            / patient_sizes[sampled_patients].sum()
+        )
     return {
-        "bootstrap_unit": "image",
+        "bootstrap_unit": "patient_cluster",
+        "bootstrap_clusters": int(patient_count),
         "baseline": _name(baseline_column),
         "candidate": _name(candidate_column),
         "baseline_mae": float(np.mean(baseline_abs)),
@@ -351,115 +363,6 @@ def _paired_bootstrap(
         "ci95_high": float(np.quantile(boot, 0.975)),
         "bootstrap_probability_improvement": float(np.mean(boot > 0.0)),
         "bootstrap_samples": int(samples),
-    }
-
-
-def ensemble_mae(members: np.ndarray, y_true: np.ndarray) -> float:
-    return float(np.mean(np.abs(members.mean(axis=1) - y_true)))
-
-
-def diversity(members: np.ndarray) -> float:
-    return float(np.mean(np.var(members, axis=1)))
-
-
-def ambiguity_decomposition(
-    members: np.ndarray,
-    y_true: np.ndarray,
-) -> dict[str, float]:
-    ensemble_mse = float(np.mean((members.mean(axis=1) - y_true) ** 2))
-    mean_member_mse = float(
-        np.mean(
-            [
-                np.mean((members[:, index] - y_true) ** 2)
-                for index in range(members.shape[1])
-            ]
-        )
-    )
-    member_diversity = diversity(members)
-    return {
-        "mean_member_mse": mean_member_mse,
-        "diversity": member_diversity,
-        "ensemble_mse": ensemble_mse,
-        "ensemble_mae": ensemble_mae(members, y_true),
-        "identity_residual": abs(
-            ensemble_mse - (mean_member_mse - member_diversity)
-        ),
-    }
-
-
-def paired_diversity_bootstrap(
-    color_abs: np.ndarray,
-    rgb_abs: np.ndarray,
-    color_diversity_per_image: np.ndarray,
-    rgb_diversity_per_image: np.ndarray,
-    *,
-    samples: int,
-    seed: int,
-) -> dict[str, object]:
-    rng = np.random.default_rng(seed)
-    observed_mae = float(rgb_abs.mean() - color_abs.mean())
-    observed_diversity = float(
-        color_diversity_per_image.mean() - rgb_diversity_per_image.mean()
-    )
-    bootstrap_mae = np.empty(samples)
-    bootstrap_diversity = np.empty(samples)
-    for index in range(samples):
-        sampled = rng.integers(0, len(color_abs), size=len(color_abs))
-        bootstrap_mae[index] = (
-            rgb_abs[sampled].mean() - color_abs[sampled].mean()
-        )
-        bootstrap_diversity[index] = (
-            color_diversity_per_image[sampled].mean()
-            - rgb_diversity_per_image[sampled].mean()
-        )
-    return {
-        "bootstrap_unit": "image",
-        "mae_improvement_years": observed_mae,
-        "mae_ci95_low": float(np.quantile(bootstrap_mae, 0.025)),
-        "mae_ci95_high": float(np.quantile(bootstrap_mae, 0.975)),
-        "mae_prob_improvement": float(np.mean(bootstrap_mae > 0.0)),
-        "diversity_gain": observed_diversity,
-        "diversity_ci95_low": float(np.quantile(bootstrap_diversity, 0.025)),
-        "diversity_ci95_high": float(np.quantile(bootstrap_diversity, 0.975)),
-        "diversity_prob_gain": float(np.mean(bootstrap_diversity > 0.0)),
-        "bootstrap_samples": int(samples),
-    }
-
-
-def canonical_diversity_analysis(
-    frame: pd.DataFrame,
-    *,
-    split: str,
-    samples: int,
-    seed: int,
-) -> dict[str, object]:
-    y_true = frame["age_true"].to_numpy(dtype=np.float64)
-    color_members = frame[COLOR4_COLUMNS].to_numpy(dtype=np.float64)
-    rgb4_members = frame[RGB4_COLUMNS].to_numpy(dtype=np.float64)
-
-    color_absolute_error = np.abs(color_members.mean(axis=1) - y_true)
-    rgb4_absolute_error = np.abs(rgb4_members.mean(axis=1) - y_true)
-    color_diversity_per_image = np.var(color_members, axis=1)
-    rgb4_diversity_per_image = np.var(rgb4_members, axis=1)
-    bootstrap = paired_diversity_bootstrap(
-        color_absolute_error,
-        rgb4_absolute_error,
-        color_diversity_per_image,
-        rgb4_diversity_per_image,
-        samples=samples,
-        seed=seed,
-    )
-    return {
-        "split": split,
-        "n_images": int(len(frame)),
-        "color4_canonical": ambiguity_decomposition(color_members, y_true),
-        "rgb4_independent": ambiguity_decomposition(rgb4_members, y_true),
-        "color4_members": ["rgb_seed42", "lab_seed42", "hsv_seed42", "ycrcb_seed42"],
-        "rgb4_members": ["rgb_seed43", "rgb_seed44", "rgb_seed45", "rgb_seed46"],
-        "diversity_ratio_color4_vs_rgb4": float(
-            diversity(color_members) / diversity(rgb4_members)
-        ),
-        "bootstrap_color4_vs_rgb4": bootstrap,
     }
 
 
@@ -503,7 +406,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Create missing model predictions, then produce the canonical "
-            "metrics, bootstrap, and ensemble-diversity analyses."
+            "metrics and paired patient-cluster bootstrap analyses."
         )
     )
     parser.add_argument("--model-root", type=Path, default=Path("models"))
@@ -559,31 +462,15 @@ def main() -> None:
                 seed=args.seed + (100000 if split == "validation" else 0),
             )
         )
-    diversity_results = {
-        split: canonical_diversity_analysis(
-            frame,
-            split=split,
-            samples=args.bootstrap_samples,
-            seed=args.seed + (100000 if split == "validation" else 0),
-        )
-        for split, frame in frames.items()
-    }
-
     metrics_frame = pd.DataFrame(metrics)
     comparisons_frame = pd.DataFrame(comparisons)
     diagnostics_frame = pd.DataFrame(diagnostics)
     metrics_frame.to_csv(args.output_dir / "model_metrics.csv", index=False)
     comparisons_frame.to_csv(
-        args.output_dir / "paired_bootstrap_image.csv",
+        args.output_dir / "paired_bootstrap_patient_cluster.csv",
         index=False,
     )
     diagnostics_frame.to_csv(args.output_dir / "split_patient_diagnostics.csv", index=False)
-    with (args.output_dir / "canonical_ensemble_diversity.json").open(
-        "w",
-        encoding="utf-8",
-    ) as handle:
-        json.dump(diversity_results, handle, indent=2, sort_keys=True)
-        handle.write("\n")
 
     summary = {
         "prediction_actions": prediction_actions,
@@ -596,7 +483,6 @@ def main() -> None:
         .sort_values("mae")
         .to_dict(orient="records"),
         "test_comparisons": comparisons_frame.query("split == 'test'").to_dict(orient="records"),
-        "canonical_ensemble_diversity": diversity_results,
     }
     with (args.output_dir / "analysis_summary.json").open("w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2, sort_keys=True)
@@ -618,14 +504,4 @@ def main() -> None:
     print(selected_metrics.sort_values("mae").to_string(index=False))
     print("\nTest comparisons:")
     print(comparisons_frame.query("split == 'test'").to_string(index=False))
-    test_diversity = diversity_results["test"]
-    bootstrap = test_diversity["bootstrap_color4_vs_rgb4"]
-    print("\nCanonical Color4 vs RGB4 diversity:")
-    print(
-        f"  diversity ratio={test_diversity['diversity_ratio_color4_vs_rgb4']:.2f}x "
-        f"gain={bootstrap['diversity_gain']:.4f} "
-        f"CI[{bootstrap['diversity_ci95_low']:.4f},"
-        f"{bootstrap['diversity_ci95_high']:.4f}] "
-        f"P={bootstrap['diversity_prob_gain']:.3f}"
-    )
     print(f"\nWrote final analysis artifacts to {args.output_dir}")

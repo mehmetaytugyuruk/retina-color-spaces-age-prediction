@@ -1,51 +1,62 @@
-# Color-Space Diversity for Retinal Age Estimation
+# Exploring the Impact of Alternative Color Spaces in Deep Retinal Age Prediction
 
-**Repository guide:** [Overview](#overview) · [Study design](#study-design) · [Results](#primary-results) · [Reproduction](#reproducing-the-study) · [Structure](#repository-structure)
+**Resources:** [Pretrained weights](https://huggingface.co/mehmetaytugyuruk/retinal-color-spaces-age-estimation) · [Paper-to-code mapping](docs/paper-to-code-mapping.md) · [Citation](#citation)
+
+## Publication
+
+> M. A. Yürük and A. Memiş, "Exploring the Impact of Alternative Color Spaces in Deep
+> Retinal Age Prediction from Fundus Images," ATEEC 2026. **Under review.**
+
+The DOI and final publication details will be added once the review process concludes.
 
 ## Overview
 
-This repository contains the reproducible training and analysis workflow for a
-study of color representations in retinal fundus age estimation. All models use
-the same patient-disjoint data splits, ImageNet-pretrained ResNet-50
-architecture, optimization protocol, and checkpoint-selection rule. Only the
-input representation or RGB training seed changes.
+This repository contains the reproducible training and analysis workflow for a study of
+color representations in retinal fundus age estimation. All models share the same
+patient-disjoint data splits, ImageNet-pretrained ResNet-50 architecture, optimization
+protocol, and checkpoint-selection rule. Only the input representation or the RGB
+training seed changes.
 
-The primary comparison asks whether an ensemble of different color spaces
-provides more useful predictive diversity than an equal-size ensemble of RGB
-models.
+The primary comparison asks whether an ensemble of *different color spaces* provides
+more useful predictive diversity than an equal-size ensemble of *RGB models trained with
+different seeds*.
+
+Related studies on the same dataset:
+[retina-resnet-age-estimation](https://github.com/mehmetaytugyuruk/retina-resnet-age-estimation) ·
+[retina-vit-age-estimation](https://github.com/mehmetaytugyuruk/retina-vit-age-estimation)
+
+## Naming: paper ↔ code
+
+The paper and the code use different identifiers for the same three combination
+strategies. This table is authoritative:
+
+| Paper name | Members | Identifier in code and CSV outputs |
+| --- | --- | --- |
+| **Ensemble 1** | RGB, Lab, HSV, YCrCb — all seed 42 | `color4_equal` |
+| **Ensemble 2** | RGB seeds 43, 44, 45, 46 | `rgb4_equal` |
+| **Fusion Model** | Single ResNet-50 on a 12-channel RGB+Lab+HSV+YCrCb input | `fusion/rgb_lab_hsv_ycrcb_seed42` |
+
+Both ensembles average four age predictions, have the same inference cost, and share no
+model. The comparison concerns these two fixed ensembles; it is not an estimate of
+performance over a population of arbitrary training seeds.
 
 ## Study Design
 
-The canonical study contains 21 models:
+The canonical study contains **21 models**:
 
 - 17 representations trained with seed 42:
   - full `RGB`, `Lab`, `HSV`, and `YCrCb`
-  - 12 single-channel ablations: `R`, `G`, `B`, `L`, `a`, `b`, `H`, `S`,
-    `V`, `Y`, `Cr`, and `Cb`
+  - 12 single-channel ablations: `R`, `G`, `B`, `L`, `a`, `b`, `H`, `S`, `V`, `Y`, `Cr`, `Cb`
   - one grayscale structural control
 - four additional full-RGB models trained with seeds 43, 44, 45, and 46
 
-The two primary ensembles are fixed and disjoint:
-
-| Ensemble | Members |
-| --- | --- |
-| `Color4-42` | RGB seed42, Lab seed42, HSV seed42, YCrCb seed42 |
-| `RGB4` | RGB seed43, RGB seed44, RGB seed45, RGB seed46 |
-
-Both ensembles average four age predictions, have the same inference cost, and
-share no model. The comparison concerns these two fixed ensembles; it is not an
-estimate of performance over a population of arbitrary training seeds.
-
-An additional **early fusion experiment (Ensemble²)** concatenates all four
-color-space representations into a single 12-channel input tensor and trains
-one ResNet-50 on the joint representation. This is a supplementary experiment
-comparing early-fusion (input concatenation) against late-fusion (prediction
-averaging) for multi-color-space age estimation.
+The **Fusion Model** is trained separately, bringing the total number of released
+checkpoints to **22**.
 
 ## Dataset and Splits
 
-The tracked manifests define patient-level train, validation, and test splits.
-No patient, image ID, or resolved image path appears in more than one split.
+The tracked manifests define patient-level train, validation, and test splits. No
+patient, image ID, or resolved image path appears in more than one split.
 
 | Split | Images | Patients | Age range | Mean age |
 | --- | ---: | ---: | ---: | ---: |
@@ -54,8 +65,11 @@ No patient, image ID, or resolved image path appears in more than one split.
 | Test | 1,462 | 809 | 7–94 | 57.30 |
 | Total | 9,857 | 5,393 | 5–97 | — |
 
-Raw retinal images are not distributed in this repository. To reproduce the
-study, provide the same source dataset with paths matching the manifests:
+Source dataset: [Retina Age Analysis Dataset](https://huggingface.co/datasets/ramankamran/retina-age-analysis)
+(Kamran, 2025), MIT-licensed.
+
+Raw retinal images are not redistributed here. To reproduce the study, provide the same
+source dataset with paths matching the manifests:
 
 ```text
 <DATA_ROOT>/
@@ -81,52 +95,53 @@ All 21 canonical models use:
 
 The shared training template is
 [`configs/resnet50_imagenet_local.yaml`](configs/resnet50_imagenet_local.yaml).
-Representation contracts under `configs/` lock channel order, stored dtype,
-numeric range, cache format, and tensor scaling.
+Representation contracts under `configs/` lock channel order, stored dtype, numeric
+range, cache format, and tensor scaling.
 
-The Ensemble² model follows the same protocol with one architectural difference:
-its first convolutional layer accepts 12 channels (RGB + Lab + HSV + YCrCb).
-Pretrained `conv1` weights are adapted by repeating them four times and scaling
-by `1/4` to preserve the expected activation magnitude.
+The Fusion Model follows the same protocol with one architectural difference: its first
+convolutional layer accepts 12 channels (RGB + Lab + HSV + YCrCb). Pretrained `conv1`
+weights are adapted by repeating them four times and scaling by `1/4` to preserve the
+expected activation magnitude.
 
-## Primary Results
+## Results
 
-MAE is reported in years.
+MAE is reported in years. Values below are the full-precision outputs in
+`analysis/final_results/model_metrics.csv`; the paper rounds them to two decimals. The
+paper additionally reports a per-age-category breakdown that is not produced by this
+repository's analysis workflow.
 
-| Split | Color4-42 MAE | Independent RGB4 MAE | RGB4 − Color4 |
-| --- | ---: | ---: | ---: |
-| Validation | **4.9658** | 5.1680 | **0.2022** |
-| Test | **4.5983** | 4.7436 | **0.1453** |
+### Combination strategies
 
-On the test split, Color4 reduces MAE by 0.1453 years, or 3.06% relative to the
-independent RGB4 control.
+| Configuration | Validation MAE | Test MAE |
+| --- | ---: | ---: |
+| **Ensemble 1** (RGB+Lab+HSV+YCrCb) | **4.9658** | **4.5983** |
+| **Ensemble 2** (RGB seeds 43–46) | 5.1680 | 4.7436 |
+| **Fusion Model** (12-channel early fusion) | 5.6764 | 5.2039 |
 
-Uncertainty is estimated with a paired non-parametric image-level bootstrap.
-Each of 100,000 repetitions samples 1,462 test images with replacement and
-uses the same sampled indices for both ensembles.
+On the test split, Ensemble 1 reduces MAE by 0.1453 years — 3.06% relative to the
+Ensemble 2 control.
+
+The Fusion Model outperforms neither the single RGB model (test MAE 4.9067) nor
+Ensemble 1. This is consistent with the observation that the four color spaces are
+mathematically invertible transformations of each other, limiting the additional
+information available to a single jointly-trained model. Late fusion via independent
+prediction averaging remains the more effective combination strategy.
+
+### Statistical uncertainty
+
+Uncertainty is estimated with a paired non-parametric patient-level cluster bootstrap.
+Because both eyes from the same patient can occur in the test set, images are not treated
+as independent sampling units. Each of 100,000 repetitions samples 809 test-patient IDs
+with replacement, includes all images belonging to every sampled patient, and uses the
+same sampled patient clusters for both ensembles. MAE is then calculated over the pooled
+images in the resampled clusters.
 
 - observed test improvement: **0.145294 years**
-- 95% bootstrap interval: **[0.022534, 0.269069] years**
-- proportion of bootstrap improvements greater than zero: **98.975%**
+- 95% bootstrap interval: **[0.013264, 0.277294] years**
+- proportion of bootstrap improvements greater than zero: **98.417%**
 - bootstrap RNG seed: `20260720`
 
-### Diversity analysis
-
-Using the ambiguity decomposition
-`ensemble MSE = mean member MSE − diversity`:
-
-| Split | RGB4 diversity | Color4 diversity | Color4 / RGB4 |
-| --- | ---: | ---: | ---: |
-| Validation | 5.1772 | 8.8868 | **1.72×** |
-| Test | 4.6006 | 8.8991 | **1.93×** |
-
-The test diversity gain is 4.2985 with a 95% image-bootstrap interval of
-`[3.6932, 4.9477]`; all bootstrap repetitions produce a positive diversity
-gain. The result supports the interpretation that heterogeneous color
-representations help through less-correlated member errors rather than through
-a single non-RGB model outperforming RGB.
-
-## Representation Results
+Full output: [`analysis/final_results/paired_bootstrap_patient_cluster.csv`](analysis/final_results/paired_bootstrap_patient_cluster.csv).
 
 ### Full representations, seed 42
 
@@ -140,27 +155,10 @@ a single non-RGB model outperforming RGB.
 
 No non-RGB full representation outperforms RGB on the test split.
 
-### Early fusion (Ensemble²)
-
-A single ResNet-50 trained on all four color spaces concatenated into a
-12-channel input tensor, using the same training protocol as the canonical
-21 canonical models (seed 42, ReduceLROnPlateau, 80 epochs).
-
-| Model | Validation MAE | Test MAE |
-| --- | ---: | ---: |
-| Ensemble² (12-ch early fusion) | 5.6764 | 5.2039 |
-
-Ensemble² does not outperform RGB (test MAE 4.9067) or Color4-42 (test MAE
-4.5983). This is consistent with the observation that the four color spaces
-are mathematically invertible transformations of each other, limiting the
-additional information available to a single jointly-trained model. Late
-fusion via independent prediction averaging (Color4-42) remains the more
-effective combination strategy.
-
 ### Single-channel ablations
 
-Each selected channel is repeated three times to preserve the input shape
-expected by the pretrained network.
+Each selected channel is repeated three times to preserve the input shape expected by the
+pretrained network.
 
 | Representation | Validation MAE | Test MAE |
 | --- | ---: | ---: |
@@ -177,89 +175,63 @@ expected by the pretrained network.
 | YCrCb-Cr | 6.4902 | 6.1461 |
 | YCrCb-Cb | 6.5453 | 5.9632 |
 
-YCrCb-Y is the strongest single channel, followed by RGB-G. Every
-single-channel model is worse than full RGB.
+YCrCb-Y is the strongest single channel, followed by RGB-G. Every single-channel model is
+worse than full RGB.
+
+### Individually seeded RGB models
+
+| Model | Validation MAE | Test MAE |
+| --- | ---: | ---: |
+| RGB seed 42 | 5.4090 | 4.9067 |
+| RGB seed 43 | 5.5342 | 5.0659 |
+| RGB seed 44 | 5.3906 | 4.9930 |
+| RGB seed 45 | 5.4178 | 4.9849 |
+| RGB seed 46 | 5.3535 | 5.1115 |
+
+## Pretrained Weights
+
+All 22 checkpoints are on Hugging Face:
+[mehmetaytugyuruk/retinal-color-spaces-age-estimation](https://huggingface.co/mehmetaytugyuruk/retinal-color-spaces-age-estimation)
+
+```python
+from huggingface_hub import hf_hub_download
+ckpt_path = hf_hub_download(
+    "mehmetaytugyuruk/retinal-color-spaces-age-estimation",
+    "rgb/rgb_seed42.pt",
+)
+```
+
+See the model card for the full file list and a loading example.
 
 ## Repository Structure
 
 ```text
 retinal-color-transfer/
+├── analysis/final_results/       Metrics and bootstrap outputs behind the paper's tables
 ├── configs/                      Representation contracts and training template
 ├── data/
 │   ├── manifests/                Patient-disjoint split definitions
 │   └── normalization/
 │       ├── <family>/             Per-representation train-split statistics
 │       └── fusion/               12-channel fusion normalization statistics
+├── docs/paper-to-code-mapping.md Which script/table corresponds to which paper section
+├── models/<family>/<model>/      Per-model predictions.csv and training_history.csv
 ├── notebooks/
-│   └── train_all_models.ipynb    End-to-end Colab reproduction (incl. Ensemble²)
+│   └── train_all_models.ipynb    End-to-end Colab reproduction
 ├── scripts/
 │   ├── 01_prepare_training.py
 │   ├── 02_evaluate_and_analyze.py
-│   ├── generate_figure_assets.py  Color-space visualization assets for figures
-│   └── train_fusion12ch.py       Standalone Ensemble² training script
+│   ├── generate_figure_assets.py Color-space visualization assets (paper Fig. 2)
+│   └── train_fusion12ch.py       Standalone Fusion Model training script
 ├── src/retinal_color_transfer/   Training and analysis package
 ├── pyproject.toml                Dependencies and package configuration
 └── README.md
 ```
 
-## Generating Figure Assets
-
-The script `scripts/generate_figure_assets.py` reproduces the color-space
-visualization figures from a single retinal fundus image.
-
-```bash
-python3 scripts/generate_figure_assets.py --source img00007.png
-```
-
-This writes two groups under `assets/` (git-ignored):
-
-| Group | Directory | Contents |
-| --- | --- | --- |
-| Pseudo-color composites | `assets/group1_false_color/` | `rgb`, `lab`, `hsv`, `ycrcb`, `gray` |
-| Single-channel grayscale | `assets/group2_channels/` | `rgb_r/g/b`, `lab_l/a/b`, `hsv_h/s/v`, `ycrcb_y/cr/cb` |
-
-**Technique:**
-
-- **Group 1 (pseudo-color composites):** the three encoded channels of each
-  color space are mapped to the red, green, and blue display channels,
-  respectively. Channel assignment:
-
-  | Color space | Ch 0 → Red | Ch 1 → Green | Ch 2 → Blue |
-  | --- | --- | --- | --- |
-  | HSV | H | S | V |
-  | CIELAB | L | a | b |
-  | YCrCb | Y | Cr | Cb |
-
-  The displayed colors do not represent natural retinal colors; they provide a
-  consistent pseudo-color visualization of the encoded channels.
-
-- **Group 2 (grayscale):** each channel is saved individually as a grayscale
-  image so its information content can be assessed independently.
-
-**Preprocessing applied to every output:**
-
-1. **Background mask** — pixels where `max(B,G,R) < 10` in the original image
-   are forced to black after conversion, preventing Lab/YCrCb encoding
-   artefacts (the a/b offset of 128 would otherwise turn black pixels
-   green/grey in pseudo-color renders).
-2. **Crop** — the bounding rectangle of non-background pixels is computed once
-   from the original BGR image (threshold = 25, matching
-   `preprocessing/crop_pad_resize.py`) and applied to every output. No resize
-   is performed.
-
-**Channel range decisions:**
-
-All OpenCV 8-bit channels occupy `[0, 255]` except HSV-H which uses `[0, 179]`.
-Only HSV-H is linearly mapped from its fixed OpenCV range to the display range:
-
-```python
-H_display = (H.astype(float) * 255.0 / 179.0).astype('uint8')
-```
-
-Per-image auto-contrast (min-max normalization) is intentionally avoided:
-it would misrepresent low-variance channels (e.g. H, which carries little
-retinal discriminative information) as artificially detail-rich — contradicting
-the quantitative MAE results.
+Model checkpoints (`best_checkpoint.pt`) are not tracked in Git — they are released on
+Hugging Face. The per-model `predictions.csv` and `training_history.csv` files *are*
+tracked, so every number in the paper can be verified without downloading the image
+dataset or re-running inference.
 
 ## Installation
 
@@ -300,11 +272,11 @@ models/<family>/<representation>_seed<seed>/
 ### 2. Train all models
 
 Use [`notebooks/train_all_models.ipynb`](notebooks/train_all_models.ipynb) in a
-GPU-enabled Colab runtime. Set its repository URL, raw-data root, and persistent
-Drive run root, then use **Run all**.
+GPU-enabled Colab runtime. Set its repository URL, raw-data root, and persistent Drive
+run root, then use **Run all**.
 
-The notebook validates the raw data, runs preparation, verifies the 21 generated
-configs, trains every canonical model, resumes an interrupted model from
+The notebook validates the raw data, runs preparation, verifies the 21 generated configs,
+trains every canonical model, trains the Fusion Model, resumes an interrupted model from
 `latest_checkpoint.pt`, skips completed models, and runs final analysis.
 
 During training a model directory contains:
@@ -315,8 +287,8 @@ latest_checkpoint.pt
 training_history.csv
 ```
 
-After successful training, `latest_checkpoint.pt` is removed. After evaluation,
-the finalized directory contains exactly:
+After successful training, `latest_checkpoint.pt` is removed. After evaluation, the
+finalized directory contains exactly:
 
 ```text
 best_checkpoint.pt
@@ -331,22 +303,100 @@ PYTHONPATH=src python3 scripts/02_evaluate_and_analyze.py \
   --data-root /path/to/retinal-data
 ```
 
-The workflow validates and reuses every existing `predictions.csv`. If one is
-missing, it performs validation and test inference from `best_checkpoint.pt`.
-It then writes model metrics, fixed Color4-vs-RGB4 bootstrap comparisons, and
-ensemble-diversity results under `analysis/final_results/`.
+The workflow validates and reuses every existing `predictions.csv`. If one is missing, it
+performs validation and test inference from `best_checkpoint.pt`. It then writes model
+metrics and the fixed Ensemble 1 vs Ensemble 2 bootstrap comparison under
+`analysis/final_results/`.
+
+Because the tracked `predictions.csv` files are already in this repository, this step
+reproduces every reported number without access to the raw images.
+
+## Generating Figure Assets
+
+The script `scripts/generate_figure_assets.py` reproduces the color-space visualization
+in the paper (Fig. 2) from a single retinal fundus image.
+
+```bash
+python3 scripts/generate_figure_assets.py --source img00007.png
+```
+
+This writes two groups under `assets/` (git-ignored):
+
+| Group | Directory | Contents |
+| --- | --- | --- |
+| Pseudo-color composites | `assets/group1_false_color/` | `rgb`, `lab`, `hsv`, `ycrcb`, `gray` |
+| Single-channel grayscale | `assets/group2_channels/` | `rgb_r/g/b`, `lab_l/a/b`, `hsv_h/s/v`, `ycrcb_y/cr/cb` |
+
+**Technique:**
+
+- **Group 1 (pseudo-color composites):** the three encoded channels of each color space
+  are mapped to the red, green, and blue display channels, respectively. Channel
+  assignment:
+
+  | Color space | Ch 0 → Red | Ch 1 → Green | Ch 2 → Blue |
+  | --- | --- | --- | --- |
+  | HSV | H | S | V |
+  | CIELAB | L | a | b |
+  | YCrCb | Y | Cr | Cb |
+
+  The displayed colors do not represent natural retinal colors; they provide a consistent
+  pseudo-color visualization of the encoded channels.
+
+- **Group 2 (grayscale):** each channel is saved individually as a grayscale image so its
+  information content can be assessed independently.
+
+**Preprocessing applied to every output:**
+
+1. **Background mask** — pixels where `max(B,G,R) < 10` in the original image are forced
+   to black after conversion, preventing Lab/YCrCb encoding artefacts (the a/b offset of
+   128 would otherwise turn black pixels green/grey in pseudo-color renders).
+2. **Crop** — the bounding rectangle of non-background pixels is computed once from the
+   original BGR image (threshold = 25, matching `preprocessing/crop_pad_resize.py`) and
+   applied to every output. No resize is performed.
+
+**Channel range decisions:**
+
+All OpenCV 8-bit channels occupy `[0, 255]` except HSV-H which uses `[0, 179]`. Only
+HSV-H is linearly mapped from its fixed OpenCV range to the display range:
+
+```python
+H_display = (H.astype(float) * 255.0 / 179.0).astype('uint8')
+```
+
+Per-image auto-contrast (min-max normalization) is intentionally avoided: it would
+misrepresent low-variance channels (e.g. H, which carries little retinal discriminative
+information) as artificially detail-rich — contradicting the quantitative MAE results.
 
 ## Reproducibility Scope
 
-The repository tracks code, configs, split manifests, normalization statistics,
-and the end-to-end notebook. It intentionally does not track raw retinal images,
-generated caches, model checkpoints, predictions, or analysis outputs.
+The repository tracks code, configs, split manifests, normalization statistics, per-model
+predictions, analysis outputs, and the end-to-end notebook. It intentionally does not
+track raw retinal images, generated caches, or model checkpoints; the checkpoints are
+released on Hugging Face.
 
-Exact numerical reproduction requires the same source image dataset. The
-manifests validate paths and split membership but cannot verify private source
-image bytes that are not distributed with the repository.
+Exact numerical reproduction of the *training* run requires the same source image
+dataset. The manifests validate paths and split membership but cannot verify private
+source image bytes that are not distributed with the repository. Reproduction of the
+*reported metrics* requires nothing beyond this repository.
 
-The primary claim is deliberately limited to the fixed Color4-42 and independent
-RGB4 ensembles defined above. Only RGB was trained with the four additional
-control seeds; the repository does not claim seed-population robustness for
-Lab, HSV, or YCrCb.
+The primary claim is deliberately limited to the fixed Ensemble 1 and Ensemble 2 defined
+above. Only RGB was trained with the four additional control seeds; the repository does
+not claim seed-population robustness for Lab, HSV, or YCrCb.
+
+## Citation
+
+```bibtex
+@inproceedings{yuruk2026colorspaces,
+  title     = {Exploring the Impact of Alternative Color Spaces in Deep Retinal
+               Age Prediction from Fundus Images},
+  author    = {Yürük, Mehmet Aytuğ and Memiş, Abbas},
+  booktitle = {ATEEC 2026},
+  year      = {2026},
+  note      = {Under review}
+}
+```
+
+## License
+
+Code released under the [MIT License](LICENSE). The dataset is separately licensed by its
+authors (MIT, see the [dataset card](https://huggingface.co/datasets/ramankamran/retina-age-analysis)).
