@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper below."
+title: "Exploring the Impact of Alternative Color Spaces in Deep Retinal Age Prediction from Fundus Images"
+authors:
+  - family-names: "Yürük"
+    given-names: "Mehmet Aytuğ"
+    affiliation: "Istanbul University"
+  - family-names: "Memiş"
+    given-names: "Abbas"
+    affiliation: "Istanbul University"
+year: 2026
+repository-code: "https://github.com/mehmetaytugyuruk/retinal-color-transfer"
+license: MIT
+preferred-citation:
+  type: conference-paper
+  title: "Exploring the Impact of Alternative Color Spaces in Deep Retinal Age Prediction from Fundus Images"
+  authors:
+    - family-names: "Yürük"
+      given-names: "Mehmet Aytuğ"
+    - family-names: "Memiş"
+      given-names: "Abbas"
+  collection-title: "ATEEC 2026"
+  year: 2026
+  notes: "Under review. DOI and final publication details will be added after acceptance."
