@@ -22,9 +22,15 @@ htmlcov/
 # Local data and reproducible generated artifacts
 /images/
 /caches/
-/models/
-/analysis/
 /configs/generated/
+
+# Model directories: checkpoints are released on Hugging Face, but the per-model
+# predictions and training histories are tracked so every reported metric can be
+# verified without the raw images.
+/models/**
+!/models/**/
+!/models/**/predictions.csv
+!/models/**/training_history.csv
 
 # Only split manifests and locked normalization statistics are versioned in data/
 /data/*
