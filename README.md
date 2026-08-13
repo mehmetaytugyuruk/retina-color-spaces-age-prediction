@@ -1,6 +1,6 @@
 # Exploring the Impact of Alternative Color Spaces in Deep Retinal Age Prediction
 
-**Resources:** [Pretrained weights](https://huggingface.co/mehmetaytugyuruk/retinal-color-spaces-age-estimation) · [Paper-to-code mapping](docs/paper-to-code-mapping.md) · [Citation](#citation)
+**Resources:** [Pretrained weights](https://huggingface.co/mehmetaytugyuruk/retinal-color-transfer) · [Paper-to-code mapping](docs/paper-to-code-mapping.md) · [Citation](#citation)
 
 ## Publication
 
@@ -191,12 +191,12 @@ worse than full RGB.
 ## Pretrained Weights
 
 All 22 checkpoints are on Hugging Face:
-[mehmetaytugyuruk/retinal-color-spaces-age-estimation](https://huggingface.co/mehmetaytugyuruk/retinal-color-spaces-age-estimation)
+[mehmetaytugyuruk/retinal-color-transfer](https://huggingface.co/mehmetaytugyuruk/retinal-color-transfer)
 
 ```python
 from huggingface_hub import hf_hub_download
 ckpt_path = hf_hub_download(
-    "mehmetaytugyuruk/retinal-color-spaces-age-estimation",
+    "mehmetaytugyuruk/retinal-color-transfer",
     "rgb/rgb_seed42.pt",
 )
 ```
