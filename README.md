@@ -3,9 +3,9 @@
 > [!NOTE]
 > **Retinal Age Prediction research series · Study 03**
 >
-> [Series overview](https://github.com/mehmetaytugyuruk/retinal-age-prediction) · [Study 01: ResNet baselines](https://github.com/mehmetaytugyuruk/retina-resnet-age-estimation) · [Study 02: Vision Transformers](https://github.com/mehmetaytugyuruk/retina-vit-age-estimation)
+> [Publications overview](https://mehmetaytugyuruk.github.io/publications/) · [Study 01: ResNet baselines](https://github.com/mehmetaytugyuruk/retina-resnet-age-prediction) · [Study 02: Vision Transformers](https://github.com/mehmetaytugyuruk/retina-vit-age-prediction)
 
-**Resources:** [Pretrained weights](https://huggingface.co/mehmetaytugyuruk/retinal-color-transfer) · [Paper-to-code mapping](docs/paper-to-code-mapping.md) · [Citation](#citation)
+**Resources:** [Pretrained weights](https://huggingface.co/mehmetaytugyuruk/retina-color-spaces-age-prediction) · [Paper-to-code mapping](docs/paper-to-code-mapping.md) · [Citation](#citation)
 
 ## Publication
 
@@ -27,8 +27,8 @@ more useful predictive diversity than an equal-size ensemble of *RGB models trai
 different seeds*.
 
 Related studies on the same dataset:
-[ResNet baseline study](https://github.com/mehmetaytugyuruk/retina-resnet-age-estimation) ·
-[Vision Transformer study](https://github.com/mehmetaytugyuruk/retina-vit-age-estimation)
+[ResNet baseline study](https://github.com/mehmetaytugyuruk/retina-resnet-age-prediction) ·
+[Vision Transformer study](https://github.com/mehmetaytugyuruk/retina-vit-age-prediction)
 
 ## Naming: paper ↔ code
 
@@ -196,12 +196,12 @@ worse than full RGB.
 ## Pretrained Weights
 
 All 22 checkpoints are on Hugging Face:
-[mehmetaytugyuruk/retinal-color-transfer](https://huggingface.co/mehmetaytugyuruk/retinal-color-transfer)
+[mehmetaytugyuruk/retina-color-spaces-age-prediction](https://huggingface.co/mehmetaytugyuruk/retina-color-spaces-age-prediction)
 
 ```python
 from huggingface_hub import hf_hub_download
 ckpt_path = hf_hub_download(
-    "mehmetaytugyuruk/retinal-color-transfer",
+    "mehmetaytugyuruk/retina-color-spaces-age-prediction",
     "rgb/rgb_seed42.pt",
 )
 ```
