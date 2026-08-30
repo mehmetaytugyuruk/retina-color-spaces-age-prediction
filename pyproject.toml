@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "retinal-color-transfer"
 version = "0.1.0"
-description = "Retinal age-estimation study of color-space diversity and matched ensemble controls."
+description = "Study of color-space diversity and matched ensemble controls for retinal age prediction."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

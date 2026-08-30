@@ -9,7 +9,7 @@ authors:
     given-names: "Abbas"
     affiliation: "Istanbul University"
 year: 2026
-repository-code: "https://github.com/mehmetaytugyuruk/retinal-color-transfer"
+repository-code: "https://github.com/mehmetaytugyuruk/retina-color-spaces-age-prediction"
 license: MIT
 preferred-citation:
   type: conference-paper
