@@ -1,5 +1,10 @@
 # Exploring the Impact of Alternative Color Spaces in Deep Retinal Age Prediction
 
+> [!NOTE]
+> **Retinal Age Prediction research series · Study 03**
+>
+> [Series overview](https://github.com/mehmetaytugyuruk/retinal-age-prediction) · [Study 01: ResNet baselines](https://github.com/mehmetaytugyuruk/retina-resnet-age-estimation) · [Study 02: Vision Transformers](https://github.com/mehmetaytugyuruk/retina-vit-age-estimation)
+
 **Resources:** [Pretrained weights](https://huggingface.co/mehmetaytugyuruk/retinal-color-transfer) · [Paper-to-code mapping](docs/paper-to-code-mapping.md) · [Citation](#citation)
 
 ## Publication
@@ -12,7 +17,7 @@ The DOI and final publication details will be added once the review process conc
 ## Overview
 
 This repository contains the reproducible training and analysis workflow for a study of
-color representations in retinal fundus age estimation. All models share the same
+color representations in retinal fundus age prediction. All models share the same
 patient-disjoint data splits, ImageNet-pretrained ResNet-50 architecture, optimization
 protocol, and checkpoint-selection rule. Only the input representation or the RGB
 training seed changes.
@@ -22,8 +27,8 @@ more useful predictive diversity than an equal-size ensemble of *RGB models trai
 different seeds*.
 
 Related studies on the same dataset:
-[retina-resnet-age-estimation](https://github.com/mehmetaytugyuruk/retina-resnet-age-estimation) ·
-[retina-vit-age-estimation](https://github.com/mehmetaytugyuruk/retina-vit-age-estimation)
+[ResNet baseline study](https://github.com/mehmetaytugyuruk/retina-resnet-age-estimation) ·
+[Vision Transformer study](https://github.com/mehmetaytugyuruk/retina-vit-age-estimation)
 
 ## Naming: paper ↔ code
 
@@ -206,7 +211,7 @@ See the model card for the full file list and a loading example.
 ## Repository Structure
 
 ```text
-retinal-color-transfer/
+retina-color-spaces-age-prediction/
 ├── analysis/final_results/       Metrics and bootstrap outputs behind the paper's tables
 ├── configs/                      Representation contracts and training template
 ├── data/
