@@ -1,0 +1,49 @@
+# Operating-system and editor files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Python environments and generated package files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local data and reproducible generated artifacts
+/images/
+/caches/
+/configs/generated/
+
+# Model directories: checkpoints are released on Hugging Face, but the per-model
+# predictions and training histories are tracked so every reported metric can be
+# verified without the raw images.
+/models/**
+!/models/**/
+!/models/**/predictions.csv
+!/models/**/training_history.csv
+
+# Only split manifests and locked normalization statistics are versioned in data/
+/data/*
+!/data/manifests/
+!/data/manifests/*.csv
+!/data/normalization/
+!/data/normalization/**/
+!/data/normalization/**/*.json
+
+# Large experiment bundles and checkpoints
+*.pt
+*.pth
+*.zip
+
+# Generated figure assets
+/assets/

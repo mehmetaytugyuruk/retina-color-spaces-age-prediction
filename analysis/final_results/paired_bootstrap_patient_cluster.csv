@@ -1,0 +1,3 @@
+split,bootstrap_unit,bootstrap_clusters,baseline,candidate,baseline_mae,candidate_mae,observed_mae_improvement_years,ci95_low,ci95_high,bootstrap_probability_improvement,bootstrap_samples
+validation,patient_cluster,809,rgb4_equal,color4_equal,5.167964579794425,4.965782713667439,0.20218186612698652,0.06662370760964095,0.3372301604118924,0.99819,100000
+test,patient_cluster,809,rgb4_equal,color4_equal,4.743611480871937,4.598317429136867,0.14529405173507026,0.013264152602983558,0.2772940567831084,0.98417,100000

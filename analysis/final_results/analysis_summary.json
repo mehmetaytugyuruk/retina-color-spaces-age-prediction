@@ -1,0 +1,302 @@
+{
+  "prediction_actions": {
+    "grayscale_seed42": "reused",
+    "hsv_h_seed42": "reused",
+    "hsv_s_seed42": "reused",
+    "hsv_seed42": "reused",
+    "hsv_v_seed42": "reused",
+    "lab_a_seed42": "reused",
+    "lab_b_seed42": "reused",
+    "lab_l_seed42": "reused",
+    "lab_seed42": "reused",
+    "rgb_b_seed42": "reused",
+    "rgb_g_seed42": "reused",
+    "rgb_r_seed42": "reused",
+    "rgb_seed42": "reused",
+    "rgb_seed43": "reused",
+    "rgb_seed44": "reused",
+    "rgb_seed45": "reused",
+    "rgb_seed46": "reused",
+    "ycrcb_cb_seed42": "reused",
+    "ycrcb_cr_seed42": "reused",
+    "ycrcb_seed42": "reused",
+    "ycrcb_y_seed42": "reused"
+  },
+  "split_patient_diagnostics": [
+    {
+      "images": 1493,
+      "max_images_per_patient": 2,
+      "patients": 809,
+      "patients_with_multiple_images": 684,
+      "split": "validation"
+    },
+    {
+      "images": 1462,
+      "max_images_per_patient": 3,
+      "patients": 809,
+      "patients_with_multiple_images": 652,
+      "split": "test"
+    }
+  ],
+  "test_comparisons": [
+    {
+      "baseline": "rgb4_equal",
+      "baseline_mae": 4.743611480871937,
+      "bootstrap_clusters": 809,
+      "bootstrap_probability_improvement": 0.98417,
+      "bootstrap_samples": 100000,
+      "bootstrap_unit": "patient_cluster",
+      "candidate": "color4_equal",
+      "candidate_mae": 4.598317429136867,
+      "ci95_high": 0.2772940567831084,
+      "ci95_low": 0.013264152602983558,
+      "observed_mae_improvement_years": 0.14529405173507026,
+      "split": "test"
+    }
+  ],
+  "test_metrics_selected": [
+    {
+      "mae": 4.598317429136867,
+      "model": "color4_equal",
+      "split": "test"
+    },
+    {
+      "mae": 4.743611480871937,
+      "model": "rgb4_equal",
+      "split": "test"
+    },
+    {
+      "mae": 4.906690636384083,
+      "model": "rgb",
+      "split": "test"
+    },
+    {
+      "mae": 4.984945706747363,
+      "model": "rgb_seed45",
+      "split": "test"
+    },
+    {
+      "mae": 4.9929573989844425,
+      "model": "rgb_seed44",
+      "split": "test"
+    },
+    {
+      "mae": 5.065920526310896,
+      "model": "rgb_seed43",
+      "split": "test"
+    },
+    {
+      "mae": 5.1084049722229965,
+      "model": "ycrcb",
+      "split": "test"
+    },
+    {
+      "mae": 5.111526570296721,
+      "model": "rgb_seed46",
+      "split": "test"
+    },
+    {
+      "mae": 5.244756215857199,
+      "model": "lab",
+      "split": "test"
+    },
+    {
+      "mae": 5.285215529269364,
+      "model": "hsv",
+      "split": "test"
+    },
+    {
+      "mae": 5.694446272391311,
+      "model": "ycrcb_y",
+      "split": "test"
+    },
+    {
+      "mae": 5.833319051294027,
+      "model": "rgb_g",
+      "split": "test"
+    },
+    {
+      "mae": 5.915098128521752,
+      "model": "hsv_s",
+      "split": "test"
+    },
+    {
+      "mae": 5.96320641853321,
+      "model": "ycrcb_cb",
+      "split": "test"
+    },
+    {
+      "mae": 5.997555322693095,
+      "model": "grayscale",
+      "split": "test"
+    },
+    {
+      "mae": 6.029465767488837,
+      "model": "lab_b",
+      "split": "test"
+    },
+    {
+      "mae": 6.052157112048227,
+      "model": "lab_a",
+      "split": "test"
+    },
+    {
+      "mae": 6.059246549588321,
+      "model": "rgb_b",
+      "split": "test"
+    },
+    {
+      "mae": 6.067653213984009,
+      "model": "lab_l",
+      "split": "test"
+    },
+    {
+      "mae": 6.134529377699641,
+      "model": "hsv_h",
+      "split": "test"
+    },
+    {
+      "mae": 6.146123895614529,
+      "model": "ycrcb_cr",
+      "split": "test"
+    },
+    {
+      "mae": 6.704651173254865,
+      "model": "rgb_r",
+      "split": "test"
+    },
+    {
+      "mae": 6.743519511272806,
+      "model": "hsv_v",
+      "split": "test"
+    },
+    {
+      "mae": 14.31643021848581,
+      "model": "dummy_train_mean",
+      "split": "test"
+    }
+  ],
+  "train_mean_age_baseline": 57.423355549116195,
+  "validation_metrics": [
+    {
+      "mae": 4.965782713667439,
+      "model": "color4_equal",
+      "split": "validation"
+    },
+    {
+      "mae": 5.167964579794425,
+      "model": "rgb4_equal",
+      "split": "validation"
+    },
+    {
+      "mae": 5.353495375280081,
+      "model": "rgb_seed46",
+      "split": "validation"
+    },
+    {
+      "mae": 5.390583599446452,
+      "model": "rgb_seed44",
+      "split": "validation"
+    },
+    {
+      "mae": 5.4046165445975,
+      "model": "ycrcb",
+      "split": "validation"
+    },
+    {
+      "mae": 5.409013337252732,
+      "model": "rgb",
+      "split": "validation"
+    },
+    {
+      "mae": 5.41784499145713,
+      "model": "rgb_seed45",
+      "split": "validation"
+    },
+    {
+      "mae": 5.466098445795188,
+      "model": "hsv",
+      "split": "validation"
+    },
+    {
+      "mae": 5.534235240137671,
+      "model": "rgb_seed43",
+      "split": "validation"
+    },
+    {
+      "mae": 5.5419114625356425,
+      "model": "lab",
+      "split": "validation"
+    },
+    {
+      "mae": 6.082465753574545,
+      "model": "ycrcb_y",
+      "split": "validation"
+    },
+    {
+      "mae": 6.131729361522425,
+      "model": "rgb_g",
+      "split": "validation"
+    },
+    {
+      "mae": 6.1552392998251255,
+      "model": "grayscale",
+      "split": "validation"
+    },
+    {
+      "mae": 6.363700572081533,
+      "model": "hsv_s",
+      "split": "validation"
+    },
+    {
+      "mae": 6.437744425488436,
+      "model": "lab_l",
+      "split": "validation"
+    },
+    {
+      "mae": 6.490239810689619,
+      "model": "ycrcb_cr",
+      "split": "validation"
+    },
+    {
+      "mae": 6.504211907210892,
+      "model": "rgb_b",
+      "split": "validation"
+    },
+    {
+      "mae": 6.535694835506987,
+      "model": "hsv_h",
+      "split": "validation"
+    },
+    {
+      "mae": 6.545308679046883,
+      "model": "ycrcb_cb",
+      "split": "validation"
+    },
+    {
+      "mae": 6.546031756354205,
+      "model": "lab_b",
+      "split": "validation"
+    },
+    {
+      "mae": 6.731704174260691,
+      "model": "lab_a",
+      "split": "validation"
+    },
+    {
+      "mae": 7.072011874250618,
+      "model": "rgb_r",
+      "split": "validation"
+    },
+    {
+      "mae": 7.190408294003109,
+      "model": "hsv_v",
+      "split": "validation"
+    },
+    {
+      "mae": 14.424062023821007,
+      "model": "dummy_train_mean",
+      "split": "validation"
+    }
+  ]
+}

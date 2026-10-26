@@ -1,0 +1,3 @@
+split,images,patients,max_images_per_patient,patients_with_multiple_images
+validation,1493,809,2,684
+test,1462,809,3,652
